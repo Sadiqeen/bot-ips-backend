@@ -31,6 +31,9 @@ $router->group([
     $router->post('refresh', 'AuthController@refresh');
     $router->post('user', 'AuthController@me');
 
+    // Index
+    $router->get('main', 'MainController@index');
+
     // Pages
     $router->get('pages', 'PageController@index');
     $router->post('page/store', 'PageController@store');
