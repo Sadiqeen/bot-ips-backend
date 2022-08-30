@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Page extends Model
+class Config extends Model
 {
     use HasFactory;
 
@@ -16,18 +16,7 @@ class Page extends Model
      */
     protected $fillable = [
         'name',
-        'url',
-        'page_id',
-        'token',
+        'key',
+        'value',
     ];
-
-    public function district()
-    {
-        return $this->hasMany(District::class);
-    }
-
-    public function districtDesc()
-    {
-        return $this->hasMany(District::class)->orderBy('id', 'DESC');
-    }
 }

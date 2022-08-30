@@ -31,6 +31,9 @@ $router->group([
     $router->post('refresh', 'AuthController@refresh');
     $router->post('user', 'AuthController@me');
 
+    // Post
+    $router->get('post/{id}', 'PostController@to');
+
     // Index
     $router->get('main', 'MainController@index');
 
@@ -55,4 +58,12 @@ $router->group([
     $router->get('probable', 'HijriController@probableNextMonth');
     $router->post('submit-start-date', 'HijriController@saveStartMonthDate');
     $router->post('del-start-date', 'HijriController@delStartMonthDate');
+
+    // Config
+    $router->get('configs', 'ConfigController@index');
+    $router->post('config', 'ConfigController@store');
+    $router->post('config/{id}/delete', 'ConfigController@delete');
+
+    // Telegram
+    $router->post('telegram/hook', 'TelegramHookController@hook');
 });

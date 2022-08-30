@@ -37,6 +37,45 @@ class HijriController extends Controller
         ]);
     }
 
+    public function updateMonth($date)
+    {
+        $nextMonth = $this->nextMonth();
+
+        $hijri = new Hijri();
+        $hijri->month_num = $nextMonth[1];
+        $hijri->month_th = $nextMonth[0];
+        $hijri->year = $nextMonth[2];
+        $hijri->international = $date;
+        $hijri->save();
+    }
+
+    public function extendDate($qt = 0)
+    {
+        return $this->dateCal($qt);
+    }
+
+    public function today()
+    {
+        return $this->dateCal();
+    }
+
+    public function dateCal($dateExtend = 0)
+    {
+        $date = Carbon::now()->addDay($dateExtend);
+        $commonDate = Carbon::createFromFormat('Y-m-d', $date->format('Y-m-d'));
+        $skip = 0;
+
+        do {
+            $currentIsDate = Hijri::skip($skip)->latest()->first();
+            $islamicStartDate = Carbon::createFromFormat('Y-m-d', $currentIsDate->international);
+            $skip++;
+        } while ($commonDate->lessThan($islamicStartDate));
+
+        $length = $islamicStartDate->diffInDays($commonDate);
+
+        return ($length + 1)  . ' ' . $this->getMonth()[$currentIsDate->month_num] . ' ' . $currentIsDate->year;
+    }
+
     public function probableNextMonth()
     {
         $currentIsDate = Hijri::orderBy('international', "DESC")->first();
@@ -65,15 +104,9 @@ class HijriController extends Controller
     public function saveStartMonthDate(Request $request)
     {
         $possibleDate = $this->probableNextMonth();
-        $nextMonth = $this->nextMonth();
 
         if ($request->date == $possibleDate[0] || $request->date == $possibleDate[1]) {
-            $hijri = new Hijri();
-            $hijri->month_num = $nextMonth[1];
-            $hijri->month_th = $nextMonth[0];
-            $hijri->year = $nextMonth[2];
-            $hijri->international = $request->date;
-            $hijri->save();
+            $this->updateMonth($request->date);
 
             return response()->json([
                 'status' => 'success',
