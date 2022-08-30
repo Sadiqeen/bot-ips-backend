@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(UserTableSeeder::class);
         $this->call(HijriTableSeeder::class);
-        Page::factory(20)->has(District::factory()->count(10))->create();
+        $this->call(ConfigTableSeeder::class);
+        // Page::factory(20)->has(District::factory()->count(10))->create();
     }
 }

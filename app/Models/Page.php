@@ -30,4 +30,9 @@ class Page extends Model
     {
         return $this->hasMany(District::class)->orderBy('id', 'DESC');
     }
+
+    public function facebookLog()
+    {
+        return $this->hasMany(FacebookLog::class);
+    }
 }

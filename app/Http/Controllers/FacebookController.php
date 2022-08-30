@@ -54,6 +54,29 @@ class FacebookController extends Controller
         ];
     }
 
+    public function updatePost(string $post_id,string $message) : bool
+    {
+        $status = false;
+
+        try {
+            $response = $this->client->post("/{$post_id}", [
+                "query" => [
+                    'access_token' => $this->page_token
+                ],
+                "form_params" => [
+                    "message" => $message,
+                ]
+            ]);
+
+            $status = json_decode($response->getBody())->success;
+        } catch (\Throwable $err) {
+            $err = Str::limit($err, $limit = 200, $end = '...');
+            (new TelegramController)->alert($err);
+        }
+
+        return $status;
+    }
+
     public function comment(string $post_id, string $message) : array
     {
         $comment_id = '';
@@ -80,4 +103,5 @@ class FacebookController extends Controller
             "err" => $error
         ];
     }
+
 }

@@ -75,13 +75,13 @@ class TelegramHookController extends Controller
 
         if ($expectDate[0] == $date) {
             (new HijriController)->updateMonth($date);
-            // (new PrayerController)->UpdateIslamicDate();
+            (new PostController)->updatePost();
         } else {
-            // (new PrayerController)->UpdateIslamicDate();
+            (new PostController)->updatePost();
             (new HijriController)->updateMonth($date);
         }
 
-        return ['text' => "อัพเดทสำเร็จ !\n/command"];
+        return ['text' => "อัพเดทสำเร็จ !"];
     }
 
     /**

@@ -2,6 +2,8 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Models\Page;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -14,6 +16,10 @@
 */
 
 $router->get('/', function () use ($router) {
+    // $pages = Page::with("facebookLog")->get();
+
+    // dd($pages->toArray());
+
     return $router->app->version();
 });
 
