@@ -16,10 +16,6 @@ use App\Models\Page;
 */
 
 $router->get('/', function () use ($router) {
-    // $pages = Page::with("facebookLog")->get();
-
-    // dd($pages->toArray());
-
     return $router->app->version();
 });
 
@@ -36,6 +32,7 @@ $router->group([
     $router->post('logout', 'AuthController@logout');
     $router->post('refresh', 'AuthController@refresh');
     $router->post('user', 'AuthController@me');
+    $router->post('change-password', 'ProfileController@changePassword');
 
     // Post
     $router->get('post/{id}', 'PostController@to');

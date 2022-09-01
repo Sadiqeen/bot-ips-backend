@@ -26,5 +26,11 @@ class ConfigTableSeeder extends Seeder
             'key' => 'telegram_token',
             'value' => '5536084464:AAGVcypL4xP6bMC4HX9mRjTdQiGSpBU3m6k'
         ]);
+
+        Config::create([
+            'name' => 'Post TOKEN',
+            'key' => 'post_token',
+            'value' => '3eDLlk6qSzDZFWqzRDO1Ql64aQrLd0hryF04JV6eGq3PQKBeuDfLuOrMqbXVvKG9ftHTKrx3KTfpAVKbROgypPEmFbifPUXYgas1'
+        ]);
     }
 }
