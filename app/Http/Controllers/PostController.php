@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Page;
 use App\Models\FacebookLog;
 use App\Http\Controllers\FacebookController;
+use App\Models\Config;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -19,8 +21,18 @@ class PostController extends Controller
         //
     }
 
-    public function to($id)
+    public function to(Request $request, $id)
     {
+        $token = $request->input('token');
+        $token_to_validate = Config::where('key', 'post_token')->first();
+
+        if ($token !== $token_to_validate->value) {
+            return response()->json([
+                'status' => '401',
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
         $message = "";
 
         $page = Page::where('page_id', $id)->first();

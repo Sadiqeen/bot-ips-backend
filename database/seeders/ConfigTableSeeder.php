@@ -30,7 +30,7 @@ class ConfigTableSeeder extends Seeder
         Config::create([
             'name' => 'Post TOKEN',
             'key' => 'post_token',
-            'value' => '3eDLlk6qSzDZFWqzRDO1Ql64aQrLd0hryF04JV6eGq3PQKBeuDfLuOrMqbXVvKG9ftHTKrx3KTfpAVKbROgypPEmFbifPUXYgas1'
+            'value' => '3eDLlk6qSzDZFWqzRDO1Ql64aQrLd0hryF04JV6eGq3PQKBeu'
         ]);
     }
 }
