@@ -23,10 +23,7 @@ class PostController extends Controller
 
     public function to(Request $request, $id)
     {
-        $token = $request->input('token');
-        $token_to_validate = Config::where('key', 'post_token')->first();
-
-        if ($token !== $token_to_validate->value) {
+        if (!$this->verifyToken($request->input('token'))) {
             return response()->json([
                 'status' => '401',
                 'message' => 'Unauthorized.',
@@ -119,5 +116,46 @@ class PostController extends Controller
                     $telegam->alert("{$page->name} : การอัพเดทโพสมีข้อผิดพลาด");
                 }
         }
+    }
+
+    public function checkStartDate(Request $request)
+    {
+        if (!$this->verifyToken($request->input('token'))) {
+            return response()->json([
+                'status' => '401',
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
+        $today = (new HijriController)->today();
+        $date = explode(" ", $today);
+
+        if ($date[0] == 29) {
+            // Send update notification
+            $text = "โปรดอัพเดทวันสำหรับเดือนถัดไป\n";
+            $text .= "------------------------\n";
+            $text .= "สำนักจุฬาราชมนตรี\n";
+            $text .= "https://www.facebook.com/samnakjula";
+
+            (new TelegramController)->sendMessage([
+                'text' => $text,
+                'disable_web_page_preview' => false,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success'
+        ]);
+    }
+
+    private function verifyToken($token)
+    {
+        $token_to_validate = Config::where('key', 'post_token')->first();
+
+        if ($token !== $token_to_validate->value) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -36,6 +36,7 @@ $router->group([
 
     // Post
     $router->get('post/{id}', 'PostController@to');
+    $router->get('check', 'PostController@checkStartDate');
 
     // Index
     $router->get('main', 'MainController@index');
