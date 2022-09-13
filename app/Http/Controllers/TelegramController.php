@@ -29,13 +29,13 @@ class TelegramController extends Controller
     {
         $chat_id = config('token.TELEGRAM_CHAT_ID');
         $token = config('token.TELEGRAM_TOKEN');
-        $endpoint =  $this->url . $token->value . '/';
+        $endpoint =  $this->url . $token . '/';
 
         $client = new Client();
 
         // Set chat id
         $standard = [
-            'chat_id' => $chat_id->value,
+            'chat_id' => $chat_id,
             'reply_markup' => [
                 'one_time_keyboard' => true,
                 'resize_keyboard' => true,
