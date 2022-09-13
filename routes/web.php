@@ -68,6 +68,10 @@ $router->group([
     $router->post('config', 'ConfigController@store');
     $router->post('config/{id}/delete', 'ConfigController@delete');
 
+    // Log
+    $router->get('logs', 'FacebookLogController@index');
+    $router->get('log/{date}', 'FacebookLogController@getLogOndate');
+
     // Telegram
     $router->post('telegram/hook', 'TelegramHookController@hook');
 });
