@@ -11,6 +11,7 @@
         "guzzlehttp/guzzle": "7.0",
         "islamic-network/prayer-times": "^1.0",
         "laravel/lumen-framework": "^8.3.1",
+        "sentry/sentry-laravel": "^2.13",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
