@@ -27,8 +27,8 @@ class TelegramController extends Controller
 
     public function sendMessage(array $message): void
     {
-        $chat_id = env("TELEGRAM_CHAT_ID");
-        $token = env("TELEGRAM_TOKEN");
+        $chat_id = config('token.TELEGRAM_CHAT_ID');
+        $token = config('token.TELEGRAM_TOKEN');
         $endpoint =  $this->url . $token->value . '/';
 
         $client = new Client();

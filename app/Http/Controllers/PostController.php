@@ -150,7 +150,7 @@ class PostController extends Controller
 
     private function verifyToken($token)
     {
-        $token_to_validate = env("POST_TOKEN");
+        $token_to_validate = config('token.POST_TOKEN');
 
         if ($token !== $token_to_validate) {
             return false;
