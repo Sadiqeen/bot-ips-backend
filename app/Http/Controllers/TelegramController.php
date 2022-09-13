@@ -27,8 +27,8 @@ class TelegramController extends Controller
 
     public function sendMessage(array $message): void
     {
-        $chat_id = Config::where('key', 'telegram_id')->first();
-        $token = Config::where('key', 'telegram_token')->first();
+        $chat_id = env("TELEGRAM_CHAT_ID");
+        $token = env("TELEGRAM_TOKEN");
         $endpoint =  $this->url . $token->value . '/';
 
         $client = new Client();

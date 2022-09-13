@@ -150,9 +150,9 @@ class PostController extends Controller
 
     private function verifyToken($token)
     {
-        $token_to_validate = Config::where('key', 'post_token')->first();
+        $token_to_validate = env("POST_TOKEN");
 
-        if ($token !== $token_to_validate->value) {
+        if ($token !== $token_to_validate) {
             return false;
         }
 
