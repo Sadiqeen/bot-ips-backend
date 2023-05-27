@@ -18,12 +18,12 @@ class FacebookLogController extends Controller
         $this->middleware('auth:api');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $browser_total_raw = DB::raw('DATE(`created_at`) as date');
         $logs = FacebookLog::select(
             "created_at", $browser_total_raw
-        )->groupBy('date')->orderBy('created_at', 'DESC')->get();
+        )->groupBy('date')->orderBy('created_at', 'DESC')->paginate($request->input("perPage"));
 
         return response()->json([
             'status' => 'success',
