@@ -1,19 +1,13 @@
-# Dependency container
+FROM serversideup/php:7.4-fpm-nginx
 
-FROM serversideup/php:7.4-cli AS dependencies
-
-WORKDIR /app
-
-COPY composer.json composer.lock /app/
+COPY . /var/www/html
 
 RUN composer install --optimize-autoloader --no-dev
 
-# Production container
+USER $PUID:$PGID
 
-FROM serversideup/php:7.4-fpm-nginx
+COPY --chown=$PUID:$PGID . /var/www/html
 
-COPY --from=dependencies /app /var/www/html
-
-COPY . /var/www/html
+USER root:root
 
 EXPOSE 80 443
