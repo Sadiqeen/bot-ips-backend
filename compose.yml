@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      AUTORUN_ENABLED : "false"
+      SSL_MODE: "mixed"
+    ports:
+      - 8099:80
+      - 4439:443
