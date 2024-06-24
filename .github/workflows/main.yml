@@ -19,8 +19,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./ # Adjust if your project directory is different
-          server-dir: /
+          state-name: ./.github/workflows/.ftp-deploy-sync-state.json
           exclude: |
             .env
             **/.git*
