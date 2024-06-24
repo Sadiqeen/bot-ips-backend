@@ -35,3 +35,4 @@ jobs:
           server-dir: /
           exclude: |
             .env
+            !vendor/
