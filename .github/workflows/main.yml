@@ -1,0 +1,37 @@
+name: Deploy Laravel Application
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@2.30.4
+        with:
+          php-version: '7.4'
+          extensions: mbstring, exif, pcntl, bcmath, gd
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Generate optimized autoload files
+        run: composer dump-autoload -o
+
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./ # Adjust if your project directory is different
+          server-dir: /
+          exclude: |
+            .env
