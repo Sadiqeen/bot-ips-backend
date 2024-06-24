@@ -49,7 +49,7 @@ class PostController extends Controller
         // Comment to post
         if ($post["data"]) {
             $comment_message = MessageController::otherPageMessage();
-            $comment = $facebook->comment($post["data"], $comment_message);
+            // $comment = $facebook->comment($post["data"], $comment_message);
         }
 
         // If post or comment was catch
