@@ -14,15 +14,9 @@ jobs:
         uses: actions/checkout@v4.1.7
         
       - name: Deploy to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: modern-dev/ftp-mirror@v2
         with:
           server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          user: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          state-name: ./.github/workflows/.ftp-deploy-sync-state.json
-          exclude: |
-            .env
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/vendor/**
+          exclude: ".git/ .github/ vendor/ .env"
