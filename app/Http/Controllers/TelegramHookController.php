@@ -15,18 +15,18 @@ class TelegramHookController extends Controller
         $request_token = $request->header('X-Telegram-Bot-Api-Secret-Token');
         if ($request_token != $token_to_validate) {
             (new TelegramController)->alert("Invalid token");
-        }
+        } else {
+            $payload = json_decode($request->getContent(), true);
 
-        $payload = json_decode($request->getContent(), true);
+            if (isset($payload['message'])) {
+                $returnMessage = $this->filterMessage($payload['message']['text']);
+                (new TelegramController)->sendMessage($returnMessage);
+            }
 
-        if (isset($payload['message'])) {
-            $returnMessage = $this->filterMessage($payload['message']['text']);
-            (new TelegramController)->sendMessage($returnMessage);
-        }
-
-        if (isset($payload['callback_query'])) {
-            $returnMessage = $this->filterMessage($payload['callback_query']['data']);
-            (new TelegramController)->sendMessage($returnMessage);
+            if (isset($payload['callback_query'])) {
+                $returnMessage = $this->filterMessage($payload['callback_query']['data']);
+                (new TelegramController)->sendMessage($returnMessage);
+            }
         }
     }
 
