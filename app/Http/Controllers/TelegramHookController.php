@@ -11,6 +11,12 @@ class TelegramHookController extends Controller
 
     public function hook(Request $request)
     {
+        $token_to_validate = config('token.TELEGRAM_HOOK_TOKEN');
+        $request_token = $request->header('X-Telegram-Bot-Api-Secret-Token');
+        if ($request_token != $token_to_validate) {
+            (new TelegramController)->alert("Invalid token");
+        }
+
         $payload = json_decode($request->getContent(), true);
 
         if (isset($payload['message'])) {
