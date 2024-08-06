@@ -48,7 +48,7 @@ class PostController extends Controller
 
         // Comment to post
         if ($post["data"]) {
-            $comment_message = MessageController::otherPageMessage();
+            // $comment_message = MessageController::otherPageMessage();
             // $comment = $facebook->comment($post["data"], $comment_message);
         }
 
@@ -62,7 +62,7 @@ class PostController extends Controller
                 'message' => 'Can not post to page ' . $post["err"],
             ]);
         } else {
-            (new TelegramController)->alert("{$page->name} : โพสสำเร็จ");
+            // (new TelegramController)->alert("{$page->name} : โพสสำเร็จ");
         }
 
         if ($post['data']) {
