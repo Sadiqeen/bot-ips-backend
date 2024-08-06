@@ -21,6 +21,9 @@ class MessageController extends Controller
         $index = 1;
         $tomorrow = new \DateTime("tomorrow");
 
+        $message .= "------------------------------------\n\n";
+        $message .= "ปฏิทินอิสลามประเทศไทย https://islamic-calendar.sleepless-tech.com/ \n\n";
+
         foreach ($data->districtDesc as $district) {
             $time = PrayerController::GetPrayerTime($district, $tomorrow);
 
