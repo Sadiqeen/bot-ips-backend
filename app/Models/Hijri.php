@@ -19,5 +19,6 @@ class Hijri extends Model
         'month_th',
         'year',
         'international',
+        'image_name',
     ];
 }

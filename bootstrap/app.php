@@ -62,6 +62,7 @@ $app->singleton(
 $app->configure('app');
 $app->configure('cors');
 $app->configure('token');
+$app->configure('filesystems');
 
 /*
 |--------------------------------------------------------------------------
@@ -76,7 +77,7 @@ $app->configure('token');
 
 $app->middleware([
     // App\Http\Middleware\ExampleMiddleware::class
-    Fruitcake\Cors\HandleCors::class,
+    \Illuminate\Http\Middleware\HandleCors::class
 ]);
 
 $app->routeMiddleware([
@@ -98,7 +99,6 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
-$app->register(Fruitcake\Cors\CorsServiceProvider::class);
 $app->register(Sentry\Laravel\ServiceProvider::class);
 
 /*
