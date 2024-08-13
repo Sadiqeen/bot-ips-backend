@@ -107,6 +107,9 @@ class HijriController extends Controller
 
         if ($request->date == $possibleDate[0] || $request->date == $possibleDate[1]) {
             $this->updateMonth($request->date);
+            $dateToFormat = Carbon::createFromFormat('Y-m-d', $request->date);
+            (new TelegramController)->alert("ผลการดูดวงจันทร์ : " . $dateToFormat->locale('th')->translatedFormat("d F Y"));
+
 
             return response()->json([
                 'status' => 'success',
