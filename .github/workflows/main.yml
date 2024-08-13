@@ -1,0 +1,23 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - master
+      
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: git-ftp push
+      uses: sebastianpopp/git-ftp-action@releases/v3
+      with:
+        url: ${{ secrets.FTP_HOST }}
+        user: ${{ secrets.FTP_USER }}
+        password: ${{ secrets.FTP_PWD }}
+        protocol: sftp
+        port: 22
