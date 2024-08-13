@@ -19,5 +19,3 @@ jobs:
         url: ${{ secrets.FTP_HOST }}
         user: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PWD }}
-        protocol: sftp
-        port: 22
