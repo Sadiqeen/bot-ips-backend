@@ -25,7 +25,7 @@ class PrayerController extends Controller
             $date,
             $data->lat,
             $data->long,
-            $adjust->method
+            $adjust["method"]
         );
     }
 
