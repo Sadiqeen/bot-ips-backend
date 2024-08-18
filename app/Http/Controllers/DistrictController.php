@@ -20,12 +20,25 @@ class DistrictController extends Controller
         $sort = explode(".", $sort);
         $perpage = $request->get('perpage') ?? 10;
         $page_id = $request->get('page_id');
+        $search = $request->get('search') ?? "";
+
+        $query = new District;
 
         if ($page_id) {
-            $district = District::where('page_id', $page_id)->orderBy($sort[0], $sort[1])->paginate($perpage);
-        } else {
-            $district = District::with('page')->orderBy($sort[0], $sort[1])->paginate($perpage);
+            $district = $query->where('page_id', $page_id)->orderBy($sort[0], $sort[1])->paginate($perpage);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $district
+            ]);
         }
+
+        $district =  $query->with('page')
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%");
+            })
+            ->orderBy($sort[0], $sort[1])
+            ->paginate($perpage);
 
         return response()->json([
             'status' => 'success',
