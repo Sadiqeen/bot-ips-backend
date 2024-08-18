@@ -73,4 +73,9 @@ $router->group(['prefix' => 'api'], function ($router) {
     // File
     $router->post('/file/upload', 'FileController@upload');
     $router->get('/file/{name}', 'FileController@read');
+
+    // Adjust PrayerTime
+    $router->get('/adjustment', 'AdjustController@getAdjustment');
+    $router->post('/adjustment', 'AdjustController@updateAdjustment');
+    $router->get('/adjustment/prayer-time', 'AdjustController@adjustPrayerTime');
 });

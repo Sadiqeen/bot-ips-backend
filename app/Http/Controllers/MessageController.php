@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Page;
 use Carbon\Carbon;
+use App\Models\Page;
 
 class MessageController extends Controller
 {
@@ -11,7 +11,7 @@ class MessageController extends Controller
     /**
      * Build full message
      *
-     * @param $data $data [explicite description]
+     * @param $data object [explicite description]
      *
      * @return string
      */
@@ -19,13 +19,13 @@ class MessageController extends Controller
     {
         $message = $this->headerMesseage($update);
         $index = 1;
-        $tomorrow = new \DateTime("tomorrow");
+        $tomorrow = Carbon::tomorrow('Asia/Bangkok')->toDateTime();
 
         $message .= "------------------------------------\n\n";
-        $message .= "ปฏิทินอิสลามประเทศไทย https://islamic-calendar.sleepless-tech.com/ \n\n";
+        $message .= "ปฏิทินอิสลามประเทศไทย https://islamic-calendar.sleepless-tech.com \n\n";
 
         foreach ($data->districtDesc as $district) {
-            $time = PrayerController::GetPrayerTime($district, $tomorrow);
+            $time = (new PrayerController)->GetPrayerTime($district, $tomorrow);
 
             if ($index === 1) {
                 $message .= $this->mainMessage($time, $district);
@@ -70,7 +70,7 @@ class MessageController extends Controller
      * Vertical message
      *
      * @param array $time [explicite description]
-     * @param $districts $districts [explicite description]
+     * @param $districts object [explicite description]
      *
      * @return string
      */
@@ -92,7 +92,7 @@ class MessageController extends Controller
      * Horizontal message
      *
      * @param array $time [explicite description]
-     * @param $districts $districts [explicite description]
+     * @param $districts object [explicite description]
      *
      * @return string
      */
