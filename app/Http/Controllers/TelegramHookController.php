@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hijri;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class TelegramHookController extends Controller
 {
@@ -37,7 +38,7 @@ class TelegramHookController extends Controller
      *
      * @return array
      */
-    public function filterMessage(string $message) : array
+    private function filterMessage(string $message) : array
     {
         $message = strtolower($message);
 
@@ -62,6 +63,10 @@ class TelegramHookController extends Controller
 
         if ($message === "บันทึกวันที่") {
             return $this->displayAvailableDate();
+        }
+
+        if ($message === "Run migration") {
+            return $this->runMigration();
         }
 
         return ['text' => "Hello World !\n/command"];
@@ -116,6 +121,11 @@ class TelegramHookController extends Controller
                     [
                         [
                             "text" => 'ลบผลการบันทึกล่าสุด',
+                        ],
+                    ],
+                    [
+                        [
+                            "text" => 'Run migration',
                         ],
                     ],
                 ]
@@ -200,5 +210,15 @@ class TelegramHookController extends Controller
                 ]
             ]
         ];
+    }
+
+    private function runMigration(): array
+    {
+        try {
+            Artisan::call("migrate");
+            return ['text' => "อัพเดทสำเร็จ !"];
+        } catch (\Throwable $e) {
+            return ['text' => $e->getMessage()];
+        }
     }
 }
