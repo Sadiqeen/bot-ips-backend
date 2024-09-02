@@ -52,9 +52,9 @@ class MessageController extends Controller
         $islamicDay =  (new HijriController)->extendDate(1);
         $islamicDate = explode(" ", $islamicDay);
 
-        if ($islamicDate[0] != 30 || $update) {
+        if ($islamicDate[0] < 30 || $update) {
 
-            $message .= "ตรงกับวัน" . $date->locale("th")->translatedFormat("D") . " ที่ " . (new HijriController)->extendDate(1) . "\n\n";
+            $message .= "ตรงกับวัน" . $date->locale("th")->translatedFormat("D") . " ที่ " . $islamicDay . "\n\n";
 
         } else {
 
