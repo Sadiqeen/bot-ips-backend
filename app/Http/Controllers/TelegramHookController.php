@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Hijri;
 use Carbon\Carbon;
+use App\Models\Hijri;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Artisan;
 
 class TelegramHookController extends Controller
@@ -47,6 +48,10 @@ class TelegramHookController extends Controller
         if ($setDate[0] === "ตั้งวันที่") {
             return $this->storeDate($setDate[1]);
         }
+
+        Log::info(' -------------------------------------------------------------------------- ');
+        Log::info('Telegram message is ' . $message);
+        Log::info(' -------------------------------------------------------------------------- ');
 
         // Filter message
         if ($message === "!" || $message === "/command" || $message === "รายการคำสั่ง") {
