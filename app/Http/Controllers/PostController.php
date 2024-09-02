@@ -5,20 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\Page;
 use App\Models\FacebookLog;
 use App\Http\Controllers\FacebookController;
-use App\Models\Config;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+    protected TelegramController $telegramController;
+    protected MessageController $messageController;
+    protected FacebookController $facebookController;
+
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        TelegramController $telegramController,
+        MessageController $messageController,
+        FacebookController $facebookController
+    ) {
+        $this->telegramController = $telegramController;
+        $this->messageController = $messageController;
+        $this->facebookController = $facebookController;
     }
 
     public function to(Request $request, $id)
@@ -35,11 +44,10 @@ class PostController extends Controller
         $page = Page::where('page_id', $id)->first();
 
         // Build prayer time message
-        $message .= (new MessageController)->buildMessage($page);
+        $message .= $this->messageController->buildMessage($page);
 
-        $facebook = new FacebookController;
-        $facebook->set_location($page);
-        $post = $facebook->post($message);
+        $this->facebookController->set_location($page);
+        $post = $this->facebookController->post($message);
 
         $comment = [
             "data" => "",
@@ -49,20 +57,20 @@ class PostController extends Controller
         // Comment to post
         if ($post["data"]) {
             // $comment_message = MessageController::otherPageMessage();
-            // $comment = $facebook->comment($post["data"], $comment_message);
+            // $comment = $this->facebookController->comment($post["data"], $comment_message);
         }
 
         // If post or comment was catch
         if ($post["err"] || $comment["err"]) {
-            (new TelegramController)->alert("{$page->name} : " . $post["err"]);
-            (new TelegramController)->alert("{$page->name} : " . $comment["err"]);
+            $this->telegramController->alert("{$page->name} : " . $post["err"]);
+            $this->telegramController->alert("{$page->name} : " . $comment["err"]);
 
             return response()->json([
                 'status' => '500',
                 'message' => 'Can not post to page ' . $post["err"],
             ]);
         } else {
-            // (new TelegramController)->alert("{$page->name} : โพสสำเร็จ");
+            // $this->telegramController->alert("{$page->name} : โพสสำเร็จ");
         }
 
         if ($post['data']) {
@@ -89,9 +97,6 @@ class PostController extends Controller
 
     public function updatePost()
     {
-        $telegam = new TelegramController;
-        $facebook = new FacebookController;
-
         $pages = Page::with(["facebookLog" => function ($q) {
             $q->where('is_edited', 0)->whereDate('created_at', Carbon::today());
         }])->get();
@@ -99,10 +104,10 @@ class PostController extends Controller
 
         foreach ($pages as $page) {
                 // Build prayer time message
-                $message = (new MessageController)->buildMessage($page, true);
+                $message = $this->messageController->buildMessage($page, true);
 
-                $facebook->set_location($page);
-                $is_success = $facebook->updatePost($page->facebookLog[0]->post_id, $message);
+                $this->facebookController->set_location($page);
+                $is_success = $this->facebookController->updatePost($page->facebookLog[0]->post_id, $message);
 
                 if ($is_success) {
                     $log = FacebookLog::where('post_id', $page->facebookLog[0]->post_id)
@@ -111,9 +116,9 @@ class PostController extends Controller
                     $log->is_edited = 1;
                     $log->save();
 
-                    $telegam->alert("{$page->name} : อัพเดทโพสสำเร็จ");
+                    $this->telegramController->alert("{$page->name} : อัพเดทโพสสำเร็จ");
                 } else {
-                    $telegam->alert("{$page->name} : การอัพเดทโพสมีข้อผิดพลาด");
+                    $this->telegramController->alert("{$page->name} : การอัพเดทโพสมีข้อผิดพลาด");
                 }
         }
     }
@@ -137,7 +142,7 @@ class PostController extends Controller
             $text .= "สำนักจุฬาราชมนตรี\n";
             $text .= "https://www.facebook.com/samnakjula";
 
-            (new TelegramController)->sendMessage([
+            $this->telegramController->sendMessage([
                 'text' => $text,
                 'disable_web_page_preview' => false,
             ]);

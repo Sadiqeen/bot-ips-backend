@@ -5,29 +5,42 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Hijri;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Artisan;
 
 class TelegramHookController extends Controller
 {
+    protected TelegramController $telegramController;
+    protected HijriController $hijriController;
+    protected PostController $postController;
+
+    public function __construct(
+        TelegramController $telegramController,
+        HijriController $hijriController,
+        PostController $postController
+    ) {
+        $this->telegramController = $telegramController;
+        $this->hijriController = $hijriController;
+        $this->postController = $postController;
+    }
 
     public function hook(Request $request)
     {
         $token_to_validate = config('token.TELEGRAM_HOOK_TOKEN');
         $request_token = $request->header('X-Telegram-Bot-Api-Secret-Token');
+
         if ($request_token != $token_to_validate) {
-            (new TelegramController)->alert("Invalid token");
+            $this->telegramController->alert("Invalid token");
         } else {
             $payload = json_decode($request->getContent(), true);
 
             if (isset($payload['message'])) {
                 $returnMessage = $this->filterMessage($payload['message']['text']);
-                (new TelegramController)->sendMessage($returnMessage);
+                $this->telegramController->sendMessage($returnMessage);
             }
 
             if (isset($payload['callback_query'])) {
                 $returnMessage = $this->filterMessage($payload['callback_query']['data']);
-                (new TelegramController)->sendMessage($returnMessage);
+                $this->telegramController->sendMessage($returnMessage);
             }
         }
     }
@@ -39,7 +52,7 @@ class TelegramHookController extends Controller
      *
      * @return array
      */
-    private function filterMessage(string $message) : array
+    private function filterMessage(string $message): array
     {
         $message = strtolower($message);
 
@@ -83,14 +96,14 @@ class TelegramHookController extends Controller
     private function storeDate(string $date): array
     {
         // Date to update message
-        $expectDate = (new HijriController)->probableNextMonth();
+        $expectDate = $this->hijriController->probableNextMonth();
 
         if ($expectDate[0] == $date) {
-            (new HijriController)->updateMonth($date);
-            (new PostController)->updatePost();
+            $this->hijriController->updateMonth($date);
+            $this->postController->updatePost();
         } else {
-            (new PostController)->updatePost();
-            (new HijriController)->updateMonth($date);
+            $this->postController->updatePost();
+            $this->hijriController->updateMonth($date);
         }
 
         return ['text' => "อัพเดทสำเร็จ !"];
@@ -180,7 +193,7 @@ class TelegramHookController extends Controller
      */
     private function displayAvailableDate(): array
     {
-        $isDate = (new HijriController)->today();
+        $isDate = $this->hijriController->today();
         $date = explode(" ", $isDate);
         $saved_today = Hijri::whereDate('created_at', Carbon::today())->first();
         $saved_yesterday = Hijri::whereDate('created_at', Carbon::yesterday())->first();
@@ -193,7 +206,7 @@ class TelegramHookController extends Controller
             return ['text' => "วันเริ่มต้นเดือนได้ถูกบันทึกแล้ว !\n/command"];
         }
 
-        $expectDate = (new HijriController)->probableNextMonth();
+        $expectDate = $this->hijriController->probableNextMonth();
         return [
             'text' => "โปรดเลือกวัน",
             'reply_markup' => [

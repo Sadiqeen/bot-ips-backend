@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
-use App\Models\Config;
+use Illuminate\Support\Facades\Log;
 
 class TelegramController extends Controller
 {
@@ -54,8 +54,12 @@ class TelegramController extends Controller
             $standard[$key] = $value;
         }
 
-        $response = $client->post($endpoint . 'sendMessage', [
-            RequestOptions::JSON => $standard
-        ]);
+        try {
+            $client->post($endpoint . 'sendMessage', [
+                RequestOptions::JSON => $standard
+            ]);
+        } catch (\Throwable $th) {
+            Log::error("Unable to post message to telegram : " . $th->getMessage());
+        }
     }
 }
