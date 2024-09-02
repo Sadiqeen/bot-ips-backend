@@ -49,10 +49,6 @@ class TelegramHookController extends Controller
             return $this->storeDate($setDate[1]);
         }
 
-        Log::info(' -------------------------------------------------------------------------- ');
-        Log::info('Telegram message is ' . $message);
-        Log::info(' -------------------------------------------------------------------------- ');
-
         // Filter message
         if ($message === "!" || $message === "/command" || $message === "รายการคำสั่ง") {
             return $this->command();
@@ -70,7 +66,7 @@ class TelegramHookController extends Controller
             return $this->displayAvailableDate();
         }
 
-        if ($message === "Run migration") {
+        if ($message === "run migration") {
             return $this->runMigration();
         }
 
