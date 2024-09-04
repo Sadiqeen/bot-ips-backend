@@ -110,7 +110,11 @@ class FacebookController extends Controller
         $error = '';
 
         try {
-            $this->client->delete("/{$post_id}");
+            $this->client->delete("/{$post_id}", [
+                "query" => [
+                    'access_token' => $this->page_token
+                ]
+            ]);
         } catch (\Throwable $err) {
             $error = Str::limit($err, $limit = 150, $end = '...');
         }

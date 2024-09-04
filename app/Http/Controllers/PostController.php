@@ -82,6 +82,7 @@ class PostController extends Controller
             }
 
             $log->page_id = $page->id;
+            $log->message = $message;
             $log->save();
         }
 
@@ -92,6 +93,25 @@ class PostController extends Controller
                 'post_id' => $post["data"],
                 'comment_id' => $comment["data"],
             ]
+        ]);
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $this->validate($request, [
+            'message' => 'required|string|min:1|max:10000',
+        ]);
+
+        $log = FacebookLog::with("page")->findOrFail($id);
+
+        $this->facebookController->set_location($log->page);
+        $this->facebookController->updatePost($log->post_id, $request->message);
+
+        $log->message = $request->message;
+        $log->save();
+
+        return response()->json([
+            'status' => 'success'
         ]);
     }
 
@@ -147,6 +167,26 @@ class PostController extends Controller
                 'disable_web_page_preview' => false,
             ]);
         }
+
+        return response()->json([
+            'status' => 'success'
+        ]);
+    }
+
+    public function delete(int $id)
+    {
+        $log = FacebookLog::with("page")->findOrFail($id);
+        $this->facebookController->set_location($log->page);
+        $response = $this->facebookController->deletePost($log->post_id);
+
+        if ($response['err']) {
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Can not delete post : ' . $response['err'],
+            ]);
+        }
+
+        $log->delete();
 
         return response()->json([
             'status' => 'success'
