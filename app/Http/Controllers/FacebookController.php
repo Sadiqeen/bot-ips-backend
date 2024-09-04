@@ -19,7 +19,7 @@ class FacebookController extends Controller
      */
     public function __construct()
     {
-        $this->client = new Client(['base_uri' => 'https://graph.facebook.com']);
+        $this->client = new Client(['base_uri' => 'https://graph.facebook.com/v20.0']);
     }
 
     public function set_location(object $location) : void
@@ -40,6 +40,7 @@ class FacebookController extends Controller
                 ],
                 "form_params" => [
                     "message" => $message,
+                    "link" => "https://islamic-calendar.sleepless-tech.com",
                 ]
             ]);
 
@@ -104,4 +105,22 @@ class FacebookController extends Controller
         ];
     }
 
+    public function deletePost(string $post_id)
+    {
+        $error = '';
+
+        try {
+            $this->client->delete("/{$post_id}", [
+                "query" => [
+                    'access_token' => $this->page_token
+                ]
+            ]);
+        } catch (\Throwable $err) {
+            $error = Str::limit($err, $limit = 150, $end = '...');
+        }
+
+        return [
+            "err" => $error
+        ];
+    }
 }

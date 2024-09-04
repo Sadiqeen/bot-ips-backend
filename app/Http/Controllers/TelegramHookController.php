@@ -96,17 +96,24 @@ class TelegramHookController extends Controller
     private function storeDate(string $date): array
     {
         // Date to update message
-        $expectDate = $this->hijriController->probableNextMonth();
+        $updateStatus = "วันที่บันทึกไม่ตรงกับการคำนวนในระบบ";
+        $expectDates = $this->hijriController->probableNextMonth();
 
-        if ($expectDate[0] == $date) {
-            $this->hijriController->updateMonth($date);
-            $this->postController->updatePost();
-        } else {
-            $this->postController->updatePost();
-            $this->hijriController->updateMonth($date);
+        if (in_array($date, $expectDates)) {
+            $updateStatus = "อัพเดทสำเร็จ !";
+
+            if ($expectDates[0] == $date) {
+                $this->hijriController->updateMonth($date);
+                $this->postController->updatePost();
+            }
+
+            if ($expectDates[1] == $date) {
+                $this->postController->updatePost();
+                $this->hijriController->updateMonth($date);
+            }
         }
 
-        return ['text' => "อัพเดทสำเร็จ !"];
+        return ['text' => $updateStatus];
     }
 
     /**

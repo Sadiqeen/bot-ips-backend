@@ -32,6 +32,8 @@ $router->group(['prefix' => 'api'], function ($router) {
     // Post
     $router->get('post/{id}', 'PostController@to');
     $router->get('check', 'PostController@checkStartDate');
+    $router->delete('post/{id}', 'PostController@delete');
+    $router->put('post/{id}', 'PostController@update');
 
     // Index
     $router->get('main', 'MainController@index');

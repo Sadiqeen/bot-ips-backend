@@ -110,7 +110,6 @@ class HijriController extends Controller
             $dateToFormat = Carbon::createFromFormat('Y-m-d', $request->date);
             (new TelegramController)->alert("ผลการดูดวงจันทร์ : " . $dateToFormat->locale('th')->translatedFormat("d F Y"));
 
-
             return response()->json([
                 'status' => 'success',
                 'data' => $request->date
