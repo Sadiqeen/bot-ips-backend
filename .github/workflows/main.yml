@@ -22,9 +22,12 @@ jobs:
     - name: Check for composer changes
       id: composer_changed
       run: |
-        git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -qE 'composer\.json|composer\.lock' || echo "no-composer-changes" >> $GITHUB_ENV
+        if git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -qE 'composer\.json|composer\.lock'; then
+          echo "COMPOSER_CHANGED=true" >> $GITHUB_ENV
+        else
+          echo "COMPOSER_CHANGED=false" >> $GITHUB_ENV
+        fi
 
-    # Step 1: Upload code changes first via git-ftp
     - name: Upload code changes via git-ftp
       uses: sebastianpopp/git-ftp-action@releases/v3
       with:
@@ -32,23 +35,20 @@ jobs:
         user: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PWD }}
 
-    # Step 2: Install Composer dependencies locally (if changes)
     - name: Install Composer dependencies if needed
-      if: env.composer_changed != 'no-composer-changes'
+      if: env.COMPOSER_CHANGED == 'true'
       run: composer install --no-dev --optimize-autoloader
 
-    # Step 3: Zip the vendor folder (if changes)
     - name: Zip vendor folder
-      if: env.composer_changed != 'no-composer-changes'
+      if: env.COMPOSER_CHANGED == 'true'
       run: zip -r vendor.zip vendor
 
-    # Step 4: Upload vendor zip via FTP
     - name: Upload vendor zip via FTP
-      if: env.composer_changed != 'no-composer-changes'
+      if: env.COMPOSER_CHANGED == 'true'
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
         ftp-server: ${{ secrets.FTP_HOST }}
         ftp-username: ${{ secrets.FTP_USER }}
         ftp-password: ${{ secrets.FTP_PWD }}
         local-dir: vendor.zip
-        server-dir: ./  # Adjust the path as needed
+        server-dir: ./
