@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      
+
 jobs:
   deploy:
     name: Deploy
@@ -13,9 +13,42 @@ jobs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: git-ftp push
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2' # or your PHP version
+
+    - name: Check for composer changes
+      id: composer_changed
+      run: |
+        git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -qE 'composer\.json|composer\.lock' || echo "no-composer-changes" >> $GITHUB_ENV
+
+    # Step 1: Upload code changes first via git-ftp
+    - name: Upload code changes via git-ftp
       uses: sebastianpopp/git-ftp-action@releases/v3
       with:
         url: ${{ secrets.FTP_HOST }}
         user: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PWD }}
+
+    # Step 2: Install Composer dependencies locally (if changes)
+    - name: Install Composer dependencies if needed
+      if: env.composer_changed != 'no-composer-changes'
+      run: composer install --no-dev --optimize-autoloader
+
+    # Step 3: Zip the vendor folder (if changes)
+    - name: Zip vendor folder
+      if: env.composer_changed != 'no-composer-changes'
+      run: zip -r vendor.zip vendor
+
+    # Step 4: Upload vendor zip via FTP
+    - name: Upload vendor zip via FTP
+      if: env.composer_changed != 'no-composer-changes' && [[ -f vendor.zip ]]
+      uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      with:
+        ftp-server: ${{ secrets.FTP_HOST }}
+        ftp-username: ${{ secrets.FTP_USER }}
+        ftp-password: ${{ secrets.FTP_PWD }}
+        local-dir: vendor.zip
+        server-dir: ./  # Adjust the path as needed
