@@ -44,7 +44,7 @@ jobs:
 
     # Step 4: Upload vendor zip via FTP
     - name: Upload vendor zip via FTP
-      if: env.composer_changed != 'no-composer-changes' && [[ -f vendor.zip ]]
+      if: env.composer_changed != 'no-composer-changes'
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
         ftp-server: ${{ secrets.FTP_HOST }}
