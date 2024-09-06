@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use App\Models\District;
+use App\Models\Hijri;
 use  App\Models\User;
 
 class MainController extends Controller
@@ -23,6 +24,7 @@ class MainController extends Controller
         $pages = Page::count();
         $districts = District::count();
         $users = User::count();
+        $records = Hijri::count();
 
         return response()->json([
             'status' => 'success',
@@ -30,6 +32,7 @@ class MainController extends Controller
                 'pages' => $pages,
                 'districts' => $districts,
                 'users' => $users,
+                'records' => $records
             ]
         ]);
     }
