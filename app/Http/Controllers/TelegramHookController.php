@@ -83,6 +83,10 @@ class TelegramHookController extends Controller
             return $this->runMigration();
         }
 
+        if ($message === "run migration rollback") {
+            return $this->runMigrationRollback();
+        }
+
         return ['text' => "Hello World !\n/command"];
     }
 
@@ -147,6 +151,11 @@ class TelegramHookController extends Controller
                     [
                         [
                             "text" => 'Run migration',
+                        ],
+                    ],
+                    [
+                        [
+                            "text" => 'Run migration rollback',
                         ],
                     ],
                 ]
@@ -233,11 +242,21 @@ class TelegramHookController extends Controller
         ];
     }
 
-    private function runMigration(): array
+    public function runMigration(): array
     {
         try {
-            Artisan::call("migrate");
-            return ['text' => "อัพเดทสำเร็จ !"];
+            Artisan::call("migrate", ['--force' => true]);
+            return ['text' => "Migration Success !"];
+        } catch (\Throwable $e) {
+            return ['text' => $e->getMessage()];
+        }
+    }
+
+    public function runMigrationRollback(): array
+    {
+        try {
+            Artisan::call("migrate:rollback", ['--force' => true]);
+            return ['text' => "Migration Rollback Success !"];
         } catch (\Throwable $e) {
             return ['text' => $e->getMessage()];
         }
