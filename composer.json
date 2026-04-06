@@ -12,6 +12,7 @@
         "php": "^8.1",
         "fabpot/goutte": "^4.0",
         "guzzlehttp/guzzle": "^7.9",
+        "islamic-network/prayer-times": "^1.0",
         "laravel/lumen-framework": "^10.0",
         "sentry/sentry-laravel": "^4.7",
         "tymon/jwt-auth": "^2.1"
