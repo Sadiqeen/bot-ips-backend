@@ -7,48 +7,44 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Build & Deploy
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2' # or your PHP version
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
 
-    - name: Check for composer changes
-      id: composer_changed
-      run: |
-        if git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -qE 'composer\.json|composer\.lock'; then
-          echo "COMPOSER_CHANGED=true" >> $GITHUB_ENV
-        else
-          echo "COMPOSER_CHANGED=false" >> $GITHUB_ENV
-        fi
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
-    - name: Upload code changes via git-ftp
-      uses: sebastianpopp/git-ftp-action@releases/v3
-      with:
-        url: ${{ secrets.FTP_HOST }}
-        user: ${{ secrets.FTP_USER }}
-        password: ${{ secrets.FTP_PWD }}
+      - name: Zip project with vendor
+        run: |
+          zip -r deploy.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".idea/*" \
+            -x "tests/*" \
+            -x "phpunit.xml" \
+            -x ".editorconfig" \
+            -x ".styleci.yml" \
+            -x "Dockerfile" \
+            -x "compose.yml" \
+            -x ".gitignore" \
+            -x ".env.example"
 
-    - name: Install Composer dependencies if needed
-      if: env.COMPOSER_CHANGED == 'true'
-      run: composer install --no-dev --optimize-autoloader
-
-    - name: Zip vendor folder
-      if: env.COMPOSER_CHANGED == 'true'
-      run: zip -r vendor.zip vendor
-
-    - name: Upload vendor zip via FTP
-      if: env.COMPOSER_CHANGED == 'true'
-      uses: SamKirkland/FTP-Deploy-Action@4.3.0
-      with:
-        ftp-server: ${{ secrets.FTP_HOST }}
-        ftp-username: ${{ secrets.FTP_USER }}
-        ftp-password: ${{ secrets.FTP_PWD }}
-        local-dir: vendor.zip
-        server-dir: ./
+      - name: Upload zip via FTP
+        run: |
+          sudo apt-get install -y lftp
+          lftp -u "$FTP_USER","$FTP_PWD" "$FTP_HOST" -e "
+            set ssl:verify-certificate no;
+            put deploy.zip;
+            bye
+          "
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PWD: ${{ secrets.FTP_PWD }}
