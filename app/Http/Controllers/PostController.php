@@ -123,28 +123,33 @@ class PostController extends Controller
 
 
         foreach ($pages as $page) {
-                // Skip pages with no Facebook log for today
-                if ($page->facebookLog->isEmpty()) {
-                    continue;
-                }
+            $todayLog = $page->facebookLog->first();
 
-                // Build prayer time message
-                $message = $this->messageController->buildMessage($page, true);
+            // Skip pages with no Facebook log for today
+            if (!$todayLog) {
+                continue;
+            }
 
-                $this->facebookController->set_location($page);
-                $is_success = $this->facebookController->updatePost($page->facebookLog[0]->post_id, $message);
+            // Build prayer time message
+            $message = $this->messageController->buildMessage($page, true);
 
-                if ($is_success) {
-                    $log = FacebookLog::where('post_id', $page->facebookLog[0]->post_id)
-                        ->where("is_edited", 0)
-                        ->first();
+            $this->facebookController->set_location($page);
+            $is_success = $this->facebookController->updatePost($todayLog->post_id, $message);
+
+            if ($is_success) {
+                $log = FacebookLog::where('post_id', $todayLog->post_id)
+                    ->where("is_edited", 0)
+                    ->first();
+
+                if ($log) {
                     $log->is_edited = 1;
                     $log->save();
-
-                    $this->telegramController->alert("{$page->name} : อัพเดทโพสสำเร็จ");
-                } else {
-                    $this->telegramController->alert("{$page->name} : การอัพเดทโพสมีข้อผิดพลาด");
                 }
+
+                $this->telegramController->alert("{$page->name} : อัพเดทโพสสำเร็จ");
+            } else {
+                $this->telegramController->alert("{$page->name} : การอัพเดทโพสมีข้อผิดพลาด");
+            }
         }
     }
 
