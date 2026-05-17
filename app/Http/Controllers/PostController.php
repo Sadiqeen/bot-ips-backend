@@ -123,6 +123,11 @@ class PostController extends Controller
 
 
         foreach ($pages as $page) {
+                // Skip pages with no Facebook log for today
+                if ($page->facebookLog->isEmpty()) {
+                    continue;
+                }
+
                 // Build prayer time message
                 $message = $this->messageController->buildMessage($page, true);
 
