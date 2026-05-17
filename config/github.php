@@ -1,10 +1,7 @@
 <?php
 
 return [
-    "SYNC_TARGETS" => env("GITHUB_SYNC_TARGETS", "[]"),
-    "SYNC_OWNER" => env("GITHUB_SYNC_OWNER"),
-    "SYNC_REPO" => env("GITHUB_SYNC_REPO"),
-    "SYNC_PATH" => env("GITHUB_SYNC_PATH", "hijris.json"),
-    "SYNC_BRANCH" => env("GITHUB_SYNC_BRANCH", "main"),
-    "SYNC_TOKEN" => env("GITHUB_SYNC_TOKEN"),
+    "SYNC_MAX_TARGETS" => (int) env("GITHUB_SYNC_MAX_TARGETS", 10),
+    "SYNC_DEFAULT_PATH" => env("GITHUB_SYNC_DEFAULT_PATH", "hijris.json"),
+    "SYNC_DEFAULT_BRANCH" => env("GITHUB_SYNC_DEFAULT_BRANCH", "main"),
 ];

@@ -274,45 +274,19 @@ class HijriController extends Controller
 
     private function getGithubSyncTargets(): array
     {
-        $configuredTargets = config('github.SYNC_TARGETS', []);
-
-        if (is_string($configuredTargets)) {
-            $decoded = json_decode($configuredTargets, true);
-            if (is_array($decoded)) {
-                $configuredTargets = $decoded;
-            } else {
-                $configuredTargets = [];
-            }
-        }
-
         $targets = [];
-        if (is_array($configuredTargets)) {
-            foreach ($configuredTargets as $target) {
-                if (!is_array($target)) {
-                    continue;
-                }
+        $maxTargets = (int) config('github.SYNC_MAX_TARGETS', 10);
+        $defaultPath = (string) config('github.SYNC_DEFAULT_PATH', 'hijris.json');
+        $defaultBranch = (string) config('github.SYNC_DEFAULT_BRANCH', 'main');
 
-                $owner = $target['owner'] ?? null;
-                $repo = $target['repo'] ?? null;
-                $path = $target['path'] ?? 'hijris.json';
-                $branch = $target['branch'] ?? 'main';
-                $token = $target['token'] ?? null;
+        for ($i = 1; $i <= $maxTargets; $i++) {
+            $owner = env("GITHUB_SYNC_OWNER_{$i}");
+            $repo = env("GITHUB_SYNC_REPO_{$i}");
+            $token = env("GITHUB_SYNC_TOKEN_{$i}");
+            $path = env("GITHUB_SYNC_PATH_{$i}", $defaultPath);
+            $branch = env("GITHUB_SYNC_BRANCH_{$i}", $defaultBranch);
 
-                if ($owner && $repo && $path && $branch && $token) {
-                    $targets[] = compact('owner', 'repo', 'path', 'branch', 'token');
-                }
-            }
-        }
-
-        // Backward compatibility with old single target vars.
-        if (count($targets) === 0) {
-            $owner = config('github.SYNC_OWNER');
-            $repo = config('github.SYNC_REPO');
-            $path = config('github.SYNC_PATH', 'hijris.json');
-            $branch = config('github.SYNC_BRANCH', 'main');
-            $token = config('github.SYNC_TOKEN');
-
-            if ($owner && $repo && $path && $branch && $token) {
+            if ($owner && $repo && $token) {
                 $targets[] = compact('owner', 'repo', 'path', 'branch', 'token');
             }
         }
