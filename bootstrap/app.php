@@ -62,6 +62,7 @@ $app->singleton(
 $app->configure('app');
 $app->configure('cors');
 $app->configure('token');
+$app->configure('github');
 $app->configure('filesystems');
 
 /*

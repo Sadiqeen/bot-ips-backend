@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Hijri;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class HijriController extends Controller
 {
@@ -154,5 +156,167 @@ class HijriController extends Controller
             '11' => 'ซุ้ลเกาะดะห์',
             '12' => 'ซุ้ลฮิจยะห์',
         ];
+    }
+
+    public function syncHijriJsonToGithub(bool $dryRun = false): array
+    {
+        $targets = $this->getGithubSyncTargets();
+        if (count($targets) === 0) {
+            return [
+                'ok' => false,
+                'message' => 'No sync targets configured',
+                'targets' => [],
+            ];
+        }
+
+        $hijri = Hijri::orderBy('id', 'DESC')->get()->toArray();
+        for ($i = 0; $i < count($hijri); $i++) {
+            $hijri[$i]['deletable'] = $i === 0;
+        }
+
+        $payload = [
+            'status' => 'success',
+            'data' => [
+                'data' => $hijri,
+                'probable' => $this->probableNextMonth(),
+                'nextMonth' => $this->nextMonth(),
+            ],
+            'updated_at' => Carbon::now()->toIso8601String(),
+        ];
+
+        $content = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($content === false) {
+            Log::error('Hijri GitHub sync failed: cannot encode payload');
+            return [
+                'ok' => false,
+                'message' => 'Cannot encode payload',
+                'targets' => [],
+            ];
+        }
+
+        $client = new Client(['base_uri' => 'https://api.github.com/']);
+        $results = [];
+
+        foreach ($targets as $target) {
+            $owner = $target['owner'];
+            $repo = $target['repo'];
+            $path = $target['path'];
+            $branch = $target['branch'];
+            $token = $target['token'];
+            $apiPath = "repos/{$owner}/{$repo}/contents/{$path}";
+
+            $headers = [
+                'Accept' => 'application/vnd.github+json',
+                'Authorization' => 'Bearer ' . $token,
+                'X-GitHub-Api-Version' => '2022-11-28',
+            ];
+
+            try {
+                $sha = null;
+
+                try {
+                    $response = $client->get($apiPath, [
+                        'headers' => $headers,
+                        'query' => ['ref' => $branch],
+                    ]);
+                    $body = json_decode((string) $response->getBody(), true);
+                    $sha = $body['sha'] ?? null;
+                } catch (\Throwable $th) {
+                    // File may not exist yet on first sync.
+                }
+
+                if (!$dryRun) {
+                    $requestBody = [
+                        'message' => 'chore: sync hijri date json',
+                        'content' => base64_encode($content),
+                        'branch' => $branch,
+                    ];
+
+                    if ($sha) {
+                        $requestBody['sha'] = $sha;
+                    }
+
+                    $client->put($apiPath, [
+                        'headers' => $headers,
+                        'json' => $requestBody,
+                    ]);
+                }
+
+                $results[] = [
+                    'target' => "{$owner}/{$repo}:{$path}@{$branch}",
+                    'ok' => true,
+                    'mode' => $dryRun ? 'dry-run' : 'push',
+                ];
+            } catch (\Throwable $th) {
+                Log::error('Hijri GitHub sync failed [' . $owner . '/' . $repo . ']: ' . $th->getMessage());
+                $results[] = [
+                    'target' => "{$owner}/{$repo}:{$path}@{$branch}",
+                    'ok' => false,
+                    'mode' => $dryRun ? 'dry-run' : 'push',
+                    'error' => $th->getMessage(),
+                ];
+            }
+        }
+
+        $allOk = true;
+        foreach ($results as $result) {
+            if (!$result['ok']) {
+                $allOk = false;
+                break;
+            }
+        }
+
+        return [
+            'ok' => $allOk,
+            'targets' => $results,
+        ];
+    }
+
+    private function getGithubSyncTargets(): array
+    {
+        $configuredTargets = config('github.SYNC_TARGETS', []);
+
+        if (is_string($configuredTargets)) {
+            $decoded = json_decode($configuredTargets, true);
+            if (is_array($decoded)) {
+                $configuredTargets = $decoded;
+            } else {
+                $configuredTargets = [];
+            }
+        }
+
+        $targets = [];
+        if (is_array($configuredTargets)) {
+            foreach ($configuredTargets as $target) {
+                if (!is_array($target)) {
+                    continue;
+                }
+
+                $owner = $target['owner'] ?? null;
+                $repo = $target['repo'] ?? null;
+                $path = $target['path'] ?? 'hijris.json';
+                $branch = $target['branch'] ?? 'main';
+                $token = $target['token'] ?? null;
+
+                if ($owner && $repo && $path && $branch && $token) {
+                    $targets[] = compact('owner', 'repo', 'path', 'branch', 'token');
+                }
+            }
+        }
+
+        // Backward compatibility with old single target vars.
+        if (count($targets) === 0) {
+            $owner = config('github.SYNC_OWNER');
+            $repo = config('github.SYNC_REPO');
+            $path = config('github.SYNC_PATH', 'hijris.json');
+            $branch = config('github.SYNC_BRANCH', 'main');
+            $token = config('github.SYNC_TOKEN');
+
+            if ($owner && $repo && $path && $branch && $token) {
+                $targets[] = compact('owner', 'repo', 'path', 'branch', 'token');
+            }
+        }
+
+        return $targets;
     }
 }

@@ -87,6 +87,10 @@ class TelegramHookController extends Controller
             return $this->runMigrationRollback();
         }
 
+        if ($message === "sync hijri" || $message === "ซิงค์ฮิจเราะห์") {
+            return $this->syncHijri();
+        }
+
         return ['text' => "Hello World !\n/command"];
     }
 
@@ -141,6 +145,11 @@ class TelegramHookController extends Controller
                     [
                         [
                             "text" => 'ดูผลการบันทึกย้อนหลัง',
+                        ],
+                    ],
+                    [
+                        [
+                            "text" => 'Sync Hijri',
                         ],
                     ],
                     [
@@ -260,5 +269,16 @@ class TelegramHookController extends Controller
         } catch (\Throwable $e) {
             return ['text' => $e->getMessage()];
         }
+    }
+
+    public function syncHijri(): array
+    {
+        $result = $this->hijriController->syncHijriJsonToGithub(false);
+
+        if (!($result['ok'] ?? false)) {
+            return ['text' => "Sync Hijri fail\n/command"];
+        }
+
+        return ['text' => "Sync Hijri success\n/command"];
     }
 }
